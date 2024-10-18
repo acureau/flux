@@ -1,32 +1,33 @@
 # Contains the flux command-line interface.
 
-# We're going to need to pull out config parsing logic because each markdown file will have a comment header with metadata.
 
 import os
 import util
 import config
+import shutil
 import argparse
 import sitetree
+import template
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 
 def cmd_create_post(title):
 
-    # Get working directory.
-    working_directory = os.getcwd()
+    # Get site path.
+    site_path = os.getcwd()
 
     # Ensure working directory is a site tree.
-    if not sitetree.is_site_tree(working_directory):
+    if not sitetree.is_site_tree(site_path):
         print("Working directory is not a site tree.")
         return -1
 
     # Ensure post does not exist already.
-    if sitetree.post_exists(title):
+    if sitetree.post_exists(site_path, title):
         print("Post with the same name already exists.")
         return -1
 
     # Create post.
-    if sitetree.create_post(title):
+    if sitetree.create_post(site_path, title):
         print(f"Created post titled '{title}'.")
         return 0
     else:
@@ -37,13 +38,13 @@ def cmd_create_post(title):
 def cmd_create_site(site_name):
 
     # Make sure site path does not exist.
-    site_path = util.name_to_path(site_name)
+    site_path = os.path.join(os.getcwd(), util.name_to_path(site_name))
     if os.path.exists(site_path):
         print(f"Site tree could not be created because '{site_path}' already exists.")
         return -1
 
     # Create site tree.
-    if sitetree.create_site(site_name, site_path):
+    if sitetree.create_site(site_path, site_name):
         print(f"Created a site tree at '{site_path}'.")
         return 0
     else:
@@ -51,26 +52,76 @@ def cmd_create_site(site_name):
         return -1
 
 
-def cmd_build_site(silent=False):
+def cmd_build_site(silent_success=False):
+    try:
+        # Get working directory.
+        site_path = os.getcwd()
 
-    # Get working directory.
-    working_directory = os.getcwd()
+        # Ensure working directory is a site tree.
+        if not sitetree.is_site_tree(site_path):
+            print("Working directory is not a site tree.")
+            return -1
 
-    # Ensure working directory is a site tree.
-    if not sitetree.is_site_tree(working_directory):
-        print("Working directory is not a site tree.")
-        return -1
+        # Parse config file.
+        if not config.init("site.cfg"):
+            print("Could not load 'site.cfg' config file.")
+            return -1
 
-    # Parse config file.
-    if not config.init("site.cfg"):
-        print("Could not load 'site.cfg' config file.")
+        # If .build directory is outdated, delete it.
+        if sitetree.modified_since_build(site_path):
+            if os.path.exists(".build"):
+                shutil.rmtree(".build")
+        else:
+            if not silent_success:
+                print("Site build already up to date.")
+            return 0
+
+        # Make .build directory and copy public directory into it.
+        os.makedirs(".build/posts")
+        shutil.copytree("public", ".build/public")
+
+        # Load HTML templates and resolve file includes.
+        post_html = template.resolve_file_includes(
+            util.read_file_text("templates/post.html")
+        )
+
+        index_html = template.resolve_file_includes(
+            util.read_file_text("templates/index.html")
+        )
+
+        # Create posts.
+        for file in os.listdir("posts"):
+            if file.endswith(".md"):
+                post_html_file = os.path.basename(file).replace(".md", ".html")
+                post_metadata = template.markdown_to_post(util.read_file_text(file))
+                util.write_file_text(
+                    f".build/posts/{post_html_file}",
+                    template.build(post_html, post_metadata),
+                )
+
+        # Get relative paths to HTML posts.
+        html_post_paths = [
+            file.split(".build/", 1)[1] for file in os.listdir(".build/posts")
+        ]
+
+        # Create index.
+        index_metadata = template.paths_to_index(html_post_paths)
+        util.write_file_text(
+            ".build/index.html", template.build(index_html, index_metadata)
+        )
+
+        if not silent_success:
+            print("Site built successfully.")
+        return 0
+    except:
+        print("Could not build site.")
         return -1
 
 
 def cmd_serve_site():
 
     # Try to build the site.
-    if cmd_build_site(silent=True) == -1:
+    if cmd_build_site(silent_success=True) == -1:
         return -1
 
     # Get port from config.

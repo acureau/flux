@@ -1,9 +1,8 @@
-# Contains functions for creating, verifying, and working with site trees.
+# Contains functionality related to creating, verifying, and working with site trees.
 
 
 import os
 import util
-import random
 
 
 # The help text file.
@@ -14,8 +13,8 @@ _help_text = """todo: populate this with engine details."""
 _default_config_text = """; Site configuration.
 [config]
 port = 5555
-index_element_id = index
-post_element_id = post
+index_div_id = index
+post_div_id = post
 
 ; Globally scoped metadata.
 [metadata]
@@ -29,9 +28,7 @@ _default_index_html_template = """<html lang=\"en\">
         <title>{site_name}</title>
     </head>
     <body>
-        <div id=\"index\">
-
-        </div>
+        {index}
     </body>
 </html>"""
 
@@ -43,9 +40,7 @@ _default_post_html_template = """<html lang=\"en\">
         <title>{title}</title>
     </head>
     <body>
-        <div id=\"post\">
-            
-        </div>
+        {post}
     </body>
 </html>"""
 
@@ -60,10 +55,10 @@ title: {title}
 
 
 # Creates a post in the given site tree.
-def create_post(title):
+def create_post(site_path, title):
     try:
         util.write_file_text(
-            f"posts/{util.name_to_path(title)}.md",
+            f"{site_path}/posts/{util.name_to_path(title)}.md",
             _default_post_markdown_template.format(title=title),
         )
         return True
@@ -72,12 +67,12 @@ def create_post(title):
 
 
 # Checks if a post exists in the given site tree.
-def post_exists(title):
-    return os.path.exists(f"posts/{util.name_to_path(title)}.md")
+def post_exists(site_path, title):
+    return os.path.exists(f"{site_path}/posts/{util.name_to_path(title)}.md")
 
 
 # Creates a site tree at the given path.
-def create_site(site_name, site_path):
+def create_site(site_path, site_name):
     try:
         # Create site directories.
         os.makedirs(f"{site_path}/posts")
@@ -107,23 +102,44 @@ def create_site(site_name, site_path):
 
 
 # Determines whether a directory is a site tree.
-def is_site_tree(path):
+def is_site_tree(site_path):
     required_dirs = ["posts", "public", "templates"]
     required_files = ["site.cfg", "templates/index.html", "templates/post.html"]
 
     # Check for required directories.
     for directory in required_dirs:
-        if not os.path.isdir(os.path.join(path, directory)):
+        if not os.path.isdir(os.path.join(site_path, directory)):
             return False
 
     # Check for required files.
     for file in required_files:
-        if not os.path.isfile(os.path.join(path, file)):
+        if not os.path.isfile(os.path.join(site_path, file)):
             return False
 
     return True
 
 
-# Determines whether any file in site tree has been modified since the given time.
-def is_modified_since(path, time):
-    pass
+# Determines whether any file in site tree has been modified since the last build.
+def modified_since_build(site_path):
+
+    # If the .build directory exists get its modified time.
+    if os.path.exists(f"{site_path}/.build"):
+        build_modified_time = os.path.getmtime(f"{site_path}/.build")
+
+        # Walk the site tree.
+        for root, dirs, files in os.walk(site_path):
+
+            # Exclude the .build directory.
+            if ".build" in dirs:
+                dirs.remove(".build")
+
+            # Check each file for a more recent modified time.
+            for file in files:
+                if os.path.getmtime(os.path.join(root, file)) > build_modified_time:
+                    return True
+
+    # If it doesn't exist, the site has been modified since the last build.
+    else:
+        return True
+
+    return False

@@ -34,4 +34,18 @@ def get(option):
 
 # Parses metadata from post headers, combines with global metadata.
 def get_post_metadata(post_header_string):
-    pass
+    post_metadata = {}
+
+    # Parse post metadata.
+    post_header_metadata = configparser.ConfigParser()
+    post_header_metadata.read_string(post_header_string)
+    if post_header_metadata.has_section("metadata"):
+        for k, v in post_header_metadata.items("metadata"):
+            post_metadata[k] = v
+
+    # Insert global metadata (higher precedence).
+    if _global_config.has_section("metadata"):
+        for k, v in _global_config.items("metadata"):
+            post_metadata[k] = v
+
+    return post_metadata
