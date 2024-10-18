@@ -6,7 +6,7 @@ import re
 
 # Splits a name at whitespace, joins words with hyphens, standardizes case.
 def name_to_path(name):
-    return "-".join(re.sub(r"[^a-zA-Z0-9\s-]", "", name).split()).lower()
+    return "-".join(re.sub(r"[^a-zA-Z0-9\s]", "", name).split()).lower()
 
 
 # Writes text to a file.

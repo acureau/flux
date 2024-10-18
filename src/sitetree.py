@@ -27,6 +27,7 @@ _default_index_html_template = """<html lang=\"en\">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{site_name}</title>
     </head>
+    <h1>{site_name}</h1>
     <body>
         {index}
     </body>
@@ -49,9 +50,7 @@ _default_post_html_template = """<html lang=\"en\">
 _default_post_markdown_template = """<!--
 [metadata]
 title: {title}
--->
-
-# {title}"""
+-->"""
 
 
 # Creates a post in the given site tree.

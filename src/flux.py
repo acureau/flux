@@ -81,28 +81,25 @@ def cmd_build_site(silent_success=False):
         shutil.copytree("public", ".build/public")
 
         # Load HTML templates and resolve file includes.
-        post_html = template.resolve_file_includes(
-            util.read_file_text("templates/post.html")
-        )
-
-        index_html = template.resolve_file_includes(
-            util.read_file_text("templates/index.html")
-        )
+        os.chdir("templates")
+        post_html = template.resolve_file_includes(util.read_file_text("post.html"))
+        index_html = template.resolve_file_includes(util.read_file_text("index.html"))
+        os.chdir("..")
 
         # Create posts.
         for file in os.listdir("posts"):
             if file.endswith(".md"):
-                post_html_file = os.path.basename(file).replace(".md", ".html")
-                post_metadata = template.markdown_to_post(util.read_file_text(file))
+                post_html_file = file.replace(".md", ".html")
+                post_metadata = template.markdown_to_post(
+                    util.read_file_text(f"posts/{file}")
+                )
                 util.write_file_text(
                     f".build/posts/{post_html_file}",
                     template.build(post_html, post_metadata),
                 )
 
         # Get relative paths to HTML posts.
-        html_post_paths = [
-            file.split(".build/", 1)[1] for file in os.listdir(".build/posts")
-        ]
+        html_post_paths = [f"posts/{file}" for file in os.listdir(".build/posts")]
 
         # Create index.
         index_metadata = template.paths_to_index(html_post_paths)

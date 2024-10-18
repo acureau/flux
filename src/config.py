@@ -32,8 +32,8 @@ def get(option):
         return _global_config.get("config", option)
 
 
-# Parses metadata from post headers, combines with global metadata.
-def get_post_metadata(post_header_string):
+# Gets global metadata, optionally parses local metadata from string.
+def get_metadata(post_header_string=""):
     post_metadata = {}
 
     # Parse post metadata.
