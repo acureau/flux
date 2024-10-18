@@ -34,8 +34,8 @@ def resolve_file_includes(html):
     return html
 
 
-# Converts a list of paths to a metadata collection.
-def paths_to_index(paths):
+# Converts a map of paths : post names to a metadata collection.
+def posts_to_index(posts):
 
     # Get global metadata from config.
     metadata = config.get_metadata()
@@ -51,10 +51,10 @@ def paths_to_index(paths):
     ul = html_builder.new_tag("ul")
 
     # Build link list items.
-    for path in paths:
+    for post_path in posts:
         li = html_builder.new_tag("li")
-        a = html_builder.new_tag("a", href=path)
-        a.string = "PLACEHOLDER"  # need to pass name of post too
+        a = html_builder.new_tag("a", href=post_path)
+        a.string = posts[post_path]
         li.append(a)
         ul.append(li)
 

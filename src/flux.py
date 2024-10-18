@@ -87,22 +87,32 @@ def cmd_build_site(silent_success=False):
         os.chdir("..")
 
         # Create posts.
+        post_path_name_map = {}
         for file in os.listdir("posts"):
             if file.endswith(".md"):
-                post_html_file = file.replace(".md", ".html")
+
+                # Parse post markdown.
                 post_metadata = template.markdown_to_post(
                     util.read_file_text(f"posts/{file}")
                 )
+
+                # Make sure title is provided.
+                if not "title" in post_metadata:
+                    print(f"Post '{file}' must contain metadata key 'title'.")
+                    return -1
+
+                # Build HTML post with template and metadata.
+                post_html_file = file.replace(".md", ".html")
                 util.write_file_text(
                     f".build/posts/{post_html_file}",
                     template.build(post_html, post_metadata),
                 )
 
-        # Get relative paths to HTML posts.
-        html_post_paths = [f"posts/{file}" for file in os.listdir(".build/posts")]
+                # Insert post into path:name map for index.
+                post_path_name_map[f"posts/{post_html_file}"] = post_metadata["title"]
 
         # Create index.
-        index_metadata = template.paths_to_index(html_post_paths)
+        index_metadata = template.posts_to_index(post_path_name_map)
         util.write_file_text(
             ".build/index.html", template.build(index_html, index_metadata)
         )
