@@ -11,13 +11,12 @@ Flux is a personal blog engine (currently a markdown SSG). It does what I want f
   - File inclusion.
 - Development server.
 
-<!-- Images -->
-
 ## Getting Started
 
-<!-- How to get source, build a site, and host it. -->
-
-todo
+1. Clone this source tree or download a release.
+2. `pip install <source dir / release file>`.
+3. Create a site with `flux create site "<site name>"`, `cd` into the created directory.
+4. Read the `help.txt` file.
 
 ## Contributing
 

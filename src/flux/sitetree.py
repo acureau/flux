@@ -2,11 +2,48 @@
 
 
 import os
-from . import util
+from flux import util
 
 
 # The help text file.
-_help_text = """todo: populate this with engine details."""
+_help_text = """This is your site directory. Flux commands must be executed at the root of this directory.
+First, inspect the `site.cfg` file. This config file has two sections: config and metadata.
+Config parameters change how flux works, a list of them can be found below.
+
+port - The port the development server uses to host the site.
+index_div_id = The ID of HTML div element containing the generated index.
+post_div_id = The ID of HTML div element containing a generated post.
+
+A metadata parameter is used by the templating engine to insert values in to your HTML. You 
+can define any key-value pair here. Metadata values defined in the `site.cfg` file are global.
+This means they're accessible by all templates and take precedence over local metadata. Have a 
+look at how `site_name` is used in the default `index.html` template:
+
+<title>{site_name}</title>
+
+Get the jist? Local metadata values are defined in a comment header at the top of a markdown
+file. Like so:
+
+<!--
+[metadata]
+title: <title>
+-->
+
+One more helpful feature, HTML templates can insert file contents by providing a path instead
+of a metadata key. Like so:
+
+<body>
+    {@navbar.html}
+<body>
+
+All of your HTML templates should live in the templates directory, `index.html` and `post.html`
+must exist for flux to work. Put all public resources (images, CSS, etc.) in the public directory.
+
+That's all there is to it. I've kept the code small and simple, so don't be afraid to jump in 
+and fix a bug or add a feature. To create a new post, run the following command:
+
+flux create post \"<post name>\"
+"""
 
 
 # The default config file.
@@ -18,7 +55,8 @@ post_div_id = post
 
 ; Globally scoped metadata.
 [metadata]
-site_name = {site_name}"""
+site_name = {site_name}
+"""
 
 
 # The default index.html template file.
@@ -31,7 +69,8 @@ _default_index_html_template = """<html lang=\"en\">
     <body>
         {index}
     </body>
-</html>"""
+</html>
+"""
 
 
 # The default post.html template file.
@@ -43,14 +82,16 @@ _default_post_html_template = """<html lang=\"en\">
     <body>
         {post}
     </body>
-</html>"""
+</html>
+"""
 
 
 # The default post markdown file.
 _default_post_markdown_template = """<!--
 [metadata]
 title: {title}
--->"""
+-->
+"""
 
 
 # Creates a post in the given site tree.

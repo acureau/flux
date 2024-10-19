@@ -1,10 +1,10 @@
-# Contains the flux command-line interface.
+# Contains the command-line interface.
 
 
 import os
 import shutil
 import argparse
-from . import template, sitetree, config, util
+from flux import template, sitetree, config, util
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 

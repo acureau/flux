@@ -4,7 +4,7 @@
 import re
 import os
 import marko
-from . import config, util
+from flux import config, util
 from bs4 import BeautifulSoup
 
 
