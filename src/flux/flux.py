@@ -2,12 +2,9 @@
 
 
 import os
-import util
-import config
 import shutil
 import argparse
-import sitetree
-import template
+from . import template, sitetree, config, util
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 

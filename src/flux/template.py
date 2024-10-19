@@ -3,9 +3,8 @@
 
 import re
 import os
-import util
 import marko
-import config
+from . import config, util
 from bs4 import BeautifulSoup
 
 

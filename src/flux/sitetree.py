@@ -2,7 +2,7 @@
 
 
 import os
-import util
+from . import util
 
 
 # The help text file.
