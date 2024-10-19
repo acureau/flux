@@ -1,6 +1,6 @@
 # About Flux
 
-Flux is a personal blog engine (currently a markdown SSG). It does what I want from it at this moment, and is bound to change with my requirements. Or, you know, be abandoned... hence it is _in flux_.
+Flux is a [personal blog](https://acureau.com/posts/software-in-flux.html) engine (currently a markdown SSG). It does what I want from it at this moment, and is bound to change with my requirements. Or, you know, be abandoned... hence it is _in flux_.
 
 ## Current Features
 
